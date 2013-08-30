@@ -1,0 +1,176 @@
+<html>
+<head></head>
+<body onload="javascript:Tabs();">
+
+ <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.1/themes/base/jquery-ui.css" />
+
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="springy.js"></script>
+<script src="springyui.js"></script>
+ <script src="http://code.jquery.com/ui/1.10.1/jquery-ui.js"></script>
+ <script src="http://www.nihilogic.dk/labs/canvas2image/canvas2image.js"></script>
+<style type="text/css">
+    .titlestyle {font-family:Sans-Serif;font-style:italic;font-size:x-large;font-weight:bold;color:Gray;border-width:1px;border-style:solid;border-color:White;}
+    .titlestyle:hover {font-family:Sans-Serif;font-style:italic;font-size:x-large;font-weight:bold;color:Black;background-color:#F0F0F0;border-width:1px;border-style:solid;border-color:White;}
+    body {background-color:#F0F0F0;margin:0 0 0 0;}
+    .springydemo {background-color:White; 
+  -moz-box-shadow:    3px 3px 3px 3px #ccc;
+  -webkit-box-shadow: 3px 3px 3px 3px #ccc;
+  box-shadow:         3px 3px 3px 3px #ccc;
+}
+    .titlebar {background-color:White;}
+    .navbar {background-color:#373737;}
+</style>
+<script>
+
+
+
+    var graph = new Graph();
+    var node_objects = [];
+    var relationship = []; 
+    var nodes = [];
+
+
+      function Tabs() {
+          $("#tabs").tabs();
+          $("#dialog-form").dialog({
+              autoOpen: false,
+              height: 130,
+              width: 350,
+              modal: true
+          });
+
+      };
+
+
+jQuery(function(){
+	var springy = jQuery('#springydemo').springy({
+		graph: graph,
+		nodeSelected: function(node){
+			console.log('Node selected: ' + JSON.stringify(node.data));
+		}
+});
+
+});
+
+function SubmitNew() {
+    var namevalue = addname.value;
+    node_objects.push(graph.newNode({ label: namevalue }));
+    nodes.push({ val: nodes.length - 1, text: namevalue });
+        $('#start')
+         .append($("<option></option>")
+         .attr("value", node_objects.length - 1)
+         .text(namevalue));
+        $('#end')
+         .append($("<option></option>")
+         .attr("value", node_objects.length - 1)
+         .text(namevalue));
+        addname.value = "";
+
+    };
+
+    function AddRelationship() {
+        var namevalue = addname.value;
+        var ent_rel_start = start.value;
+        var ent_rel_end = end.value;
+        graph.newEdge(node_objects[start.value], node_objects[end.value], { color: '#6A4A3C' });
+        relationship.push({ rel_start: ent_rel_start, rel_end: ent_rel_end });
+        $('#Relationship')
+         .append($("<option></option>")
+         .attr("value", relationship.length - 1)
+         .text(nodes[ent_rel_start].text + " - " + nodes[ent_rel_end].text));
+
+    }
+    function DeleteRelationship() {
+        graph.removeEdge(graph.edges[Relationship.value]);
+        $('#Relationship option:selected').remove();
+    };
+
+    function SubmitName() {
+        $("#dialog-form").dialog("close");
+        $("#titlename").empty();
+        $("#titlename").text(DAG_Name.value);
+    };
+
+    function SaveImage() {
+        var canvas = document.getElementById("springydemo");
+        document.getElementById("theimage").src = canvas.toDataURL();
+        Canvas2Image.saveAsPNG(canvas);
+
+    }
+
+
+
+</script>
+<div id="navbar" class="navbar">&nbsp;</div>
+<div id="titlebar" class="titlebar"><br /><div id="titlename" class="titlestyle" style="width:400px; padding:0 0 0 8;">Untitled DAG</div><br /></div>
+<br />
+<table style="font-size:10px;" ><tr><td width="700" align="center">
+<canvas id="springydemo" width="640" height="480" class="springydemo"/>
+<image id="theimage"></image>
+
+<br /><br />
+</td><td valign="top">
+<div id="tabs" style="width:400px;">
+<ul>
+<li><a href="#tabs-1" >Nodes</a></li>
+<li><a href="#tabs-2">Relationships</a></li> 
+<li><a href="#tabs-3">Export/Import</a></li> 
+</ul>
+<div id="tabs-1" style="width:100%;">
+<input type="text" id="addname" ></input><button id="add" onclick="javascript:SubmitNew();">Add Node</button><br /><br />
+
+<strong>Step 1:</strong> Add one or more nodes using the above text field.  <br />These will be exposures and diseases in your DAG. (e.g. Smoking, Lung Cancer, etc.)
+<br /><br />
+<strong>Step 2:</strong> Click the Relationships tab to define the relationships between the nodes.
+
+</div>
+<div id="tabs-2" style="width:100%;">
+
+<select id="start" name="start">
+<option value="-1">Start Node...</option>
+</select>
+
+<select id="end">
+<option value="-1">End Node...</option>
+</select>
+<button id="Button1" onclick="javascript:AddRelationship();">Add Relationship</button>
+<br />
+<select id="Relationship">
+<option value="-1">None...</option>
+</select>
+<button id="DeleteRel" onclick="javascript:DeleteRelationship();">Delete Relationship</button>
+</div>
+<div id="tabs-3" style="width:100%;">Import/Export function is not currently available.<br /><br /><button id="saveImage" onclick="javascript:SaveImage();">Save Image</button></div>
+</div>
+
+</td></tr></table>
+
+<div id="dialog-form" title="Create New DAG" style="font-size:10px;">
+
+<p>Enter a name to get started on a new DAG.</p>
+<input type="text" id="DAG_Name" size="25"/><button id="DAG_Name_Submit" onclick="javascript:SubmitName();">Get Started</button>
+
+</div>
+<script>
+    $("#DAG_Name").keyup(function (event) {
+        if (event.keyCode == 13) {
+            $("#DAG_Name_Submit").click();
+        }
+    });
+
+    $("#addname").keyup(function (event) {
+        if (event.keyCode == 13) {
+            $("#add").click();
+        }
+    });
+    $("#titlename").click(function () {
+//        alert("Handler for .click() called.");
+        $("#dialog-form").dialog("open");
+    });
+
+
+
+</script>
+</body>
+</html>
